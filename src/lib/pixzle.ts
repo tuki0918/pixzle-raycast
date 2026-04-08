@@ -1,5 +1,5 @@
 import { type FragmentationConfig, type ManifestData } from "@pixzle/core";
-import { ImageFragmenter, ImageRestorer, loadJson } from "@pixzle/node";
+import { ImageFragmenter, ImageRestorer, loadJson } from "./pixzle-node";
 import { MANIFEST_FILE_NAME } from "../constraints";
 
 export async function readManifest(manifestPath: string) {

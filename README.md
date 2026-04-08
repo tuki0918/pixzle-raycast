@@ -7,6 +7,44 @@ This Raycast extension provides functionality for image fragmentation and restor
 
 Note: This does not guarantee strong security.
 
+## Setup
+
+Install dependencies first:
+
+```bash
+npm install
+```
+
+This extension uses a vendored copy of `sharp` because Raycast's bundled runtime does not reliably resolve the native module from the top-level `node_modules`.
+
+After `npm install`, copy the required runtime files into `assets/vendor`:
+
+```bash
+mkdir -p assets/vendor/node_modules assets/vendor/node_modules/@img
+cp -R node_modules/sharp assets/vendor/node_modules/
+cp -R node_modules/detect-libc assets/vendor/node_modules/
+cp -R node_modules/semver assets/vendor/node_modules/
+cp -R node_modules/@img/colour assets/vendor/node_modules/@img/
+cp -R node_modules/@img/sharp-darwin-arm64 assets/vendor/node_modules/@img/
+cp -R node_modules/@img/sharp-libvips-darwin-arm64 assets/vendor/node_modules/@img/
+```
+
+Then build or run the extension:
+
+```bash
+npm run build
+```
+
+For development in Raycast, you can also use:
+
+```bash
+npm run dev
+```
+
+If you reinstall dependencies or update `sharp`, run the copy step again.
+
+Current vendored binaries target `darwin-arm64` (Apple Silicon).
+
 ## Commands
 
 - `Shuffle Images` ... Shuffle images into fragments

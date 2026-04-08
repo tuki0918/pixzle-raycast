@@ -76,7 +76,6 @@
   ],
   "dependencies": {
     "@pixzle/core": "0.2.0",
-    "@pixzle/node": "0.2.0",
     "@raycast/api": "1.104.11",
     "@raycast/utils": "2.2.3",
     "p-limit": "^6.2.0"
