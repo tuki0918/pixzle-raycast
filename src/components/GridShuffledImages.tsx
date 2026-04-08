@@ -1,18 +1,18 @@
 import { ActionPanel, Grid, Icon } from "@raycast/api";
-import { bufferToDataUrl } from "../utils/helpers";
-import type { ManifestData } from "image-shield";
+import { type ManifestData } from "@pixzle/core";
 import { MANIFEST_FILE_NAME } from "../constraints";
+import { bufferToDataUrl } from "../utils/helpers";
 import { DownloadAllImagesAction } from "./DownloadAction";
 
-interface GridEncryptedImagesProps {
+interface GridShuffledImagesProps {
   manifest: ManifestData;
   imageBuffers: Buffer[];
   workdir?: string;
 }
 
-function GridEncryptedImages({ manifest, imageBuffers, workdir }: GridEncryptedImagesProps) {
+function GridShuffledImages({ manifest, imageBuffers, workdir }: GridShuffledImagesProps) {
   return (
-    <Grid filtering={false} searchText="Encrypted Images" onSearchTextChange={() => {}} inset={Grid.Inset.Small}>
+    <Grid filtering={false} searchText="Shuffled Images" onSearchTextChange={() => {}} inset={Grid.Inset.Small}>
       <Grid.Item
         content={Icon.Document}
         title={MANIFEST_FILE_NAME}
@@ -22,7 +22,7 @@ function GridEncryptedImages({ manifest, imageBuffers, workdir }: GridEncryptedI
               manifest={manifest}
               imageBuffers={imageBuffers}
               workdir={workdir}
-              isFragmented={true}
+              isShuffled={true}
             />
           </ActionPanel>
         }
@@ -39,7 +39,7 @@ function GridEncryptedImages({ manifest, imageBuffers, workdir }: GridEncryptedI
                   manifest={manifest}
                   imageBuffers={imageBuffers}
                   workdir={workdir}
-                  isFragmented={true}
+                  isShuffled={true}
                 />
               </ActionPanel>
             }
@@ -50,4 +50,4 @@ function GridEncryptedImages({ manifest, imageBuffers, workdir }: GridEncryptedI
   );
 }
 
-export default GridEncryptedImages;
+export default GridShuffledImages;

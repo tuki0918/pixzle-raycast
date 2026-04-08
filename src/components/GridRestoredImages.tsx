@@ -1,6 +1,5 @@
 import { ActionPanel, Grid } from "@raycast/api";
-import { generateRestoredFileName, generateRestoredOriginalFileName } from "image-shield/dist/utils/helpers";
-import type { ManifestData } from "image-shield";
+import { generateRestoredFileName, generateRestoredOriginalFileName, type ManifestData } from "@pixzle/core";
 import { bufferToDataUrl } from "../utils/helpers";
 import { DownloadAllImagesAction, DownloadImageAction } from "./DownloadAction";
 
@@ -14,7 +13,7 @@ function GridRestoredImages({ manifest, imageBuffers, workdir }: GridRestoredIma
   return (
     <Grid filtering={false} searchText="Restored Images" onSearchTextChange={() => {}}>
       {imageBuffers.map((imageBuffer, i) => {
-        const imageInfo = manifest.images[i] ?? {};
+        const imageInfo = manifest.images[i];
         const fileName = generateRestoredOriginalFileName(imageInfo) ?? generateRestoredFileName(manifest, i);
         return (
           <Grid.Item

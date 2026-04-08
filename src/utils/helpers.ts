@@ -2,7 +2,7 @@ import { MANIFEST_FILE_NAME } from "../constraints";
 import { homedir } from "node:os";
 import { createDirIfNotExists, writeFile, fileExists } from "./file";
 import { dirname, join } from "node:path";
-import { ManifestData } from "image-shield";
+import { type ManifestData } from "@pixzle/core";
 import { getSelectedFinderItems } from "@raycast/api";
 
 export function bufferToDataUrl(buffer: Buffer, mimeType = "image/png") {
@@ -72,7 +72,7 @@ export async function writeManifest(manifest: ManifestData, fileName: string, ba
   await writeFile(outputPath, fileName, JSON.stringify(manifest, null, 2));
 }
 
-export async function writeEncryptedImage(
+export async function writeShuffledImage(
   manifest: ManifestData,
   imageBuffer: Buffer,
   fileName: string,
