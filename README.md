@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/tuki0918/pixzle-raycast/main/assets/extension-icon.png" alt="pixzle Icon" width="128" height="128">
+  <img src="assets/extension-icon.png" alt="pixzle Icon" width="128" height="128">
   <h1 align="center">pixzle</h1>
 </div>
 
