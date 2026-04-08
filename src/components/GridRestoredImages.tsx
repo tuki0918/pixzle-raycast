@@ -2,6 +2,7 @@ import { ActionPanel, Grid } from "@raycast/api";
 import { generateRestoredFileName, generateRestoredOriginalFileName, type ManifestData } from "@pixzle/core";
 import { bufferToDataUrl } from "../utils/helpers";
 import { DownloadAllImagesAction, DownloadImageAction } from "./DownloadAction";
+import { PreviewImageAction } from "./ImagePreviewDetail";
 
 interface GridRestoredImagesProps {
   manifest: ManifestData;
@@ -15,6 +16,18 @@ function GridRestoredImages({ manifest, imageBuffers, workdir }: GridRestoredIma
       {imageBuffers.map((imageBuffer, i) => {
         const imageInfo = manifest.images[i];
         const fileName = generateRestoredOriginalFileName(imageInfo) ?? generateRestoredFileName(manifest, i);
+        const detailActions = (
+          <ActionPanel>
+            <DownloadImageAction
+              manifest={manifest}
+              imageBuffer={imageBuffer}
+              fileName={fileName}
+              workdir={workdir}
+              imageBuffers={imageBuffers}
+            />
+            <DownloadAllImagesAction manifest={manifest} imageBuffers={imageBuffers} workdir={workdir} />
+          </ActionPanel>
+        );
         return (
           <Grid.Item
             key={i}
@@ -23,6 +36,7 @@ function GridRestoredImages({ manifest, imageBuffers, workdir }: GridRestoredIma
             subtitle={`#${i + 1}`}
             actions={
               <ActionPanel>
+                <PreviewImageAction title={fileName} imageBuffer={imageBuffer} actions={detailActions} />
                 <DownloadImageAction
                   manifest={manifest}
                   imageBuffer={imageBuffer}
