@@ -63,6 +63,15 @@
       "label": "Original File Name",
       "default": true,
       "required": false
+    },
+    {
+      "name": "crossImageShuffle",
+      "title": "Cross Image Shuffle",
+      "description": "Default: false\nShuffle blocks across multiple selected images.",
+      "type": "checkbox",
+      "label": "Enable Cross Image Shuffle",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {

@@ -32,6 +32,11 @@ Note: This does not guarantee strong security.
 - **Default**: `Enabled`
 - **Description**: Restore the original file name when restoring.
 
+### Cross Image Shuffle
+- **Type**: Checkbox
+- **Default**: `Disabled`
+- **Description**: Shuffle blocks across all selected images instead of shuffling each image independently.
+
 </details>
 
 ## Dependencies

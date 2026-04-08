@@ -72,6 +72,7 @@ export function useShuffleImages(): UseShuffleImagesResult {
             blockSize: Number(preferences.blockSize),
             prefix: preferences.prefix,
             preserveName: preferences.preserveName,
+            crossImageShuffle: preferences.crossImageShuffle,
           },
           validated.imagePaths,
         );
