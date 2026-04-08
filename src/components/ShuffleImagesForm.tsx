@@ -53,7 +53,7 @@ function ShuffleImagesForm() {
         canChooseDirectories={true}
         canChooseFiles={false}
         {...itemProps.outputDir}
-        info="Default: Downloads/{UUID}"
+        info="Default: Downloads/pixzle.{UUID}"
       />
     </Form>
   );

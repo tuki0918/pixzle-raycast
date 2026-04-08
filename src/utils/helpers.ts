@@ -5,9 +5,16 @@ import { dirname, join } from "node:path";
 import { type ManifestData } from "@pixzle/core";
 import { getSelectedFinderItems } from "@raycast/api";
 
+const DOWNLOAD_DIRECTORY_PREFIX = "pixzle";
+
 export function bufferToDataUrl(buffer: Buffer, mimeType = "image/png") {
   const base64 = buffer.toString("base64");
   return `data:${mimeType};base64,${base64}`;
+}
+
+function getDownloadDirectoryName(manifestId: string, suffix?: string) {
+  const baseName = `${DOWNLOAD_DIRECTORY_PREFIX}.${manifestId}`;
+  return suffix ? `${baseName}${suffix}` : baseName;
 }
 
 export async function findManifestAndImages(filePaths: string[]) {
@@ -66,7 +73,7 @@ export async function getSelectedItems(): Promise<string[]> {
 }
 
 export async function writeManifest(manifest: ManifestData, fileName: string, basePath?: string) {
-  const outputDir = `${manifest.id}`;
+  const outputDir = getDownloadDirectoryName(manifest.id);
   const outputPath = basePath ? join(basePath, outputDir) : join(homedir(), "Downloads", outputDir);
   await createDirIfNotExists(outputPath);
   await writeFile(outputPath, fileName, JSON.stringify(manifest, null, 2));
@@ -78,7 +85,7 @@ export async function writeShuffledImage(
   fileName: string,
   basePath?: string,
 ) {
-  const outputDir = `${manifest.id}`;
+  const outputDir = getDownloadDirectoryName(manifest.id);
   const outputPath = basePath ? join(basePath, outputDir) : join(homedir(), "Downloads", outputDir);
   await createDirIfNotExists(outputPath);
   await writeFile(outputPath, fileName, imageBuffer);
@@ -90,7 +97,7 @@ export async function writeRestoredImage(
   fileName: string,
   basePath?: string,
 ) {
-  const outputDir = `${manifest.id}_restored`;
+  const outputDir = getDownloadDirectoryName(manifest.id, "_restored");
   const outputPath = basePath ? join(basePath, outputDir) : join(homedir(), "Downloads", outputDir);
   await createDirIfNotExists(outputPath);
   await writeFile(outputPath, fileName, imageBuffer);
