@@ -17,17 +17,7 @@ npm install
 
 This extension uses a vendored copy of `sharp` because Raycast's bundled runtime does not reliably resolve the native module from the top-level `node_modules`.
 
-After `npm install`, copy the required runtime files into `assets/vendor`:
-
-```bash
-mkdir -p assets/vendor/node_modules assets/vendor/node_modules/@img
-cp -R node_modules/sharp assets/vendor/node_modules/
-cp -R node_modules/detect-libc assets/vendor/node_modules/
-cp -R node_modules/semver assets/vendor/node_modules/
-cp -R node_modules/@img/colour assets/vendor/node_modules/@img/
-cp -R node_modules/@img/sharp-darwin-arm64 assets/vendor/node_modules/@img/
-cp -R node_modules/@img/sharp-libvips-darwin-arm64 assets/vendor/node_modules/@img/
-```
+The `postinstall` script copies the required runtime files into `assets/vendor` automatically.
 
 Then build or run the extension:
 
@@ -41,9 +31,13 @@ For development in Raycast, you can also use:
 npm run dev
 ```
 
-If you reinstall dependencies or update `sharp`, run the copy step again.
+If you reinstall dependencies or update `sharp`, `npm install` runs the vendoring step again. You can also run it manually with:
 
-Current vendored binaries target `darwin-arm64` (Apple Silicon).
+```bash
+npm run postinstall
+```
+
+Vendored binaries target the macOS architecture used when `npm install` runs.
 
 ## Commands
 
