@@ -7,6 +7,15 @@ This Raycast extension provides functionality for image fragmentation and restor
 
 Note: This does not guarantee strong security.
 
+![](docs/howto_instantcall.gif)
+
+<details>
+<summary>Default Call</summary>
+
+![](docs/howto_use.gif)
+
+</details>
+
 ## Setup
 
 Install dependencies first:
@@ -48,6 +57,8 @@ Vendored binaries target the macOS architecture used when `npm install` runs.
 
 <details>
 <summary>You can customize the extension behavior through the following preferences:</summary>
+
+![](docs/preferences.png)
 
 ### Block Size
 - **Type**: Dropdown (1, 2, 3, 4, 8, 16, 32, 64, 128, 256)
