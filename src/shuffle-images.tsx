@@ -5,14 +5,14 @@ import ShuffleImagesForm from "./components/ShuffleImagesForm";
 import { useShuffleImages } from "./hooks/useShuffleImages";
 
 export default function Command() {
-  const { isLoading, isInstantCall, data, initialize } = useShuffleImages();
+  const { isLoading, data, initialize } = useShuffleImages();
   const { isLoading: isInitializing } = usePromise(async () => await initialize(), []);
 
   if (isLoading || isInitializing) {
     return <GridLoadingView />;
   }
 
-  if (isInstantCall && data) {
+  if (data?.mode === "instant") {
     return <GridLoadingView title="Shuffling images..." />;
   }
 

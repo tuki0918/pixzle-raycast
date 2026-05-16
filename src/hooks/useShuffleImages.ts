@@ -11,20 +11,25 @@ import { MANIFEST_FILE_NAME, CONCURRENCY_LIMIT } from "../constraints";
 
 interface UseShuffleImagesResult {
   isLoading: boolean;
-  isInstantCall: boolean;
   error?: string;
-  data?: { manifest: ManifestData; imageBuffers: Buffer[]; workdir: string | undefined };
+  data?: ShuffleImagesData;
   initialize: () => Promise<void>;
   handleFormSubmit: (values: ShuffleImagesFormValues) => Promise<void>;
 }
 
+type ProcessingMode = "instant" | "manual";
+
+type ShuffleImagesData = {
+  mode: ProcessingMode;
+  manifest: ManifestData;
+  imageBuffers: Buffer[];
+  workdir: string | undefined;
+};
+
 export function useShuffleImages(): UseShuffleImagesResult {
   const preferences = getPreferenceValues<Preferences>();
   const { isLoading, error, setError, handleError, setIsLoading, showErrorToast } = useLoadingState();
-  const [isInstantCall, setIsInstantCall] = useState(false);
-  const [data, setData] = useState<
-    { manifest: ManifestData; imageBuffers: Buffer[]; workdir: string | undefined } | undefined
-  >();
+  const [data, setData] = useState<ShuffleImagesData>();
   const initializeStartedRef = useRef(false);
   const instantCallStartedRef = useRef(false);
 
@@ -35,7 +40,7 @@ export function useShuffleImages(): UseShuffleImagesResult {
   }, [error, showErrorToast]);
 
   const handleInstantCall = useCallback(async () => {
-    if (!isInstantCall || !data || instantCallStartedRef.current) {
+    if (data?.mode !== "instant" || instantCallStartedRef.current) {
       return;
     }
     instantCallStartedRef.current = true;
@@ -57,14 +62,14 @@ export function useShuffleImages(): UseShuffleImagesResult {
       clearRootSearch: true,
       popToRootType: PopToRootType.Immediate,
     });
-  }, [data, isInstantCall]);
+  }, [data]);
 
   useEffect(() => {
     handleInstantCall();
   }, [handleInstantCall]);
 
   const handleShuffle = useCallback(
-    async (imagePathsArg?: string[], workdirArg?: string) => {
+    async (imagePathsArg?: string[], workdirArg?: string, mode: ProcessingMode = "manual") => {
       setIsLoading(true);
       setError(undefined);
 
@@ -79,7 +84,7 @@ export function useShuffleImages(): UseShuffleImagesResult {
           },
           validated.imagePaths,
         );
-        setData({ manifest, imageBuffers: fragmentedImages, workdir: workdirArg });
+        setData({ mode, manifest, imageBuffers: fragmentedImages, workdir: workdirArg });
         setIsLoading(false);
       } catch (e) {
         handleError(e);
@@ -104,10 +109,9 @@ export function useShuffleImages(): UseShuffleImagesResult {
         return;
       }
 
-      setIsInstantCall(true);
       const { imagePaths } = await findImages(filePaths);
       const validated = validateShuffleFiles(imagePaths);
-      await handleShuffle(validated.imagePaths);
+      await handleShuffle(validated.imagePaths, undefined, "instant");
       setIsLoading(false);
     } catch (e) {
       handleError(e);
@@ -140,7 +144,6 @@ export function useShuffleImages(): UseShuffleImagesResult {
 
   return {
     isLoading,
-    isInstantCall,
     error,
     data,
     initialize,

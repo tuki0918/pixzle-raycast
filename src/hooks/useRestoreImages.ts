@@ -9,19 +9,24 @@ import { CONCURRENCY_LIMIT } from "../constraints";
 
 interface UseRestoreImagesResult {
   isLoading: boolean;
-  isInstantCall: boolean;
   error?: string;
-  data?: { manifest: ManifestData; imageBuffers: Buffer[]; workdir: string | undefined };
+  data?: RestoreImagesData;
   initialize: () => Promise<void>;
   handleFormSubmit: (values: { folders: string[] }) => Promise<void>;
 }
 
+type ProcessingMode = "instant" | "manual";
+
+type RestoreImagesData = {
+  mode: ProcessingMode;
+  manifest: ManifestData;
+  imageBuffers: Buffer[];
+  workdir: string | undefined;
+};
+
 export function useRestoreImages(): UseRestoreImagesResult {
   const { isLoading, error, setError, handleError, setIsLoading, showErrorToast } = useLoadingState();
-  const [isInstantCall, setIsInstantCall] = useState(false);
-  const [data, setData] = useState<
-    { manifest: ManifestData; imageBuffers: Buffer[]; workdir: string | undefined } | undefined
-  >();
+  const [data, setData] = useState<RestoreImagesData>();
   const initializeStartedRef = useRef(false);
   const instantCallStartedRef = useRef(false);
 
@@ -32,7 +37,7 @@ export function useRestoreImages(): UseRestoreImagesResult {
   }, [error, showErrorToast]);
 
   const handleInstantCall = useCallback(async () => {
-    if (!isInstantCall || !data || instantCallStartedRef.current) {
+    if (data?.mode !== "instant" || instantCallStartedRef.current) {
       return;
     }
     instantCallStartedRef.current = true;
@@ -53,21 +58,26 @@ export function useRestoreImages(): UseRestoreImagesResult {
       clearRootSearch: true,
       popToRootType: PopToRootType.Immediate,
     });
-  }, [data, isInstantCall]);
+  }, [data]);
 
   useEffect(() => {
     handleInstantCall();
   }, [handleInstantCall]);
 
   const handleRestore = useCallback(
-    async (manifestArg?: ManifestData, imagePathsArg?: string[], workdirArg?: string) => {
+    async (
+      manifestArg?: ManifestData,
+      imagePathsArg?: string[],
+      workdirArg?: string,
+      mode: ProcessingMode = "manual",
+    ) => {
       setIsLoading(true);
       setError(undefined);
 
       try {
         const validated = validateRestoreFiles(manifestArg, imagePathsArg);
         const imageBuffers = await restoreImages(validated.imagePaths, validated.manifest);
-        setData({ manifest: validated.manifest, imageBuffers, workdir: workdirArg });
+        setData({ mode, manifest: validated.manifest, imageBuffers, workdir: workdirArg });
         setIsLoading(false);
       } catch (e) {
         handleError(e);
@@ -92,11 +102,10 @@ export function useRestoreImages(): UseRestoreImagesResult {
         return;
       }
 
-      setIsInstantCall(true);
       const { manifestPath, imagePaths, workdir } = await findManifestAndImages(filePaths);
       const manifest = await readManifest(manifestPath);
       const validated = validateRestoreFiles(manifest, imagePaths);
-      await handleRestore(validated.manifest, validated.imagePaths, workdir);
+      await handleRestore(validated.manifest, validated.imagePaths, workdir, "instant");
       setIsLoading(false);
     } catch (e) {
       handleError(e);
@@ -123,7 +132,6 @@ export function useRestoreImages(): UseRestoreImagesResult {
 
   return {
     isLoading,
-    isInstantCall,
     error,
     data,
     initialize,

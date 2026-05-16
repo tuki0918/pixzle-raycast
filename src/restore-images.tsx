@@ -5,14 +5,14 @@ import RestoreImagesForm from "./components/RestoreImagesForm";
 import { useRestoreImages } from "./hooks/useRestoreImages";
 
 export default function Command() {
-  const { isLoading, isInstantCall, data, initialize } = useRestoreImages();
+  const { isLoading, data, initialize } = useRestoreImages();
   const { isLoading: isInitializing } = usePromise(async () => await initialize(), []);
 
   if (isLoading || isInitializing) {
     return <GridLoadingView />;
   }
 
-  if (isInstantCall && data) {
+  if (data?.mode === "instant") {
     return <GridLoadingView title="Restoring images..." />;
   }
 
