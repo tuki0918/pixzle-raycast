@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { getPreferenceValues, PopToRootType, showHUD } from "@raycast/api";
 import { generateFragmentFileName, type ManifestData } from "@pixzle/core";
 import pLimit from "p-limit";
@@ -25,6 +25,8 @@ export function useShuffleImages(): UseShuffleImagesResult {
   const [data, setData] = useState<
     { manifest: ManifestData; imageBuffers: Buffer[]; workdir: string | undefined } | undefined
   >();
+  const initializeStartedRef = useRef(false);
+  const instantCallStartedRef = useRef(false);
 
   useEffect(() => {
     if (error) {
@@ -33,9 +35,10 @@ export function useShuffleImages(): UseShuffleImagesResult {
   }, [error, showErrorToast]);
 
   const handleInstantCall = useCallback(async () => {
-    if (!isInstantCall || !data) {
+    if (!isInstantCall || !data || instantCallStartedRef.current) {
       return;
     }
+    instantCallStartedRef.current = true;
 
     const { manifest, imageBuffers, workdir } = data;
     await writeManifest(manifest, MANIFEST_FILE_NAME, workdir);
@@ -86,6 +89,11 @@ export function useShuffleImages(): UseShuffleImagesResult {
   );
 
   const initialize = useCallback(async () => {
+    if (initializeStartedRef.current) {
+      return;
+    }
+    initializeStartedRef.current = true;
+
     try {
       setIsLoading(true);
       setError(undefined);
