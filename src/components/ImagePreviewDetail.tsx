@@ -22,7 +22,13 @@ export function PreviewImageAction({
   actions,
   actionTitle = "Preview Image",
 }: PreviewImageActionProps) {
-  return <Action.Push title={actionTitle} icon={Icon.Eye} target={<ImagePreviewDetail title={title} imageBuffer={imageBuffer} actions={actions} />} />;
+  return (
+    <Action.Push
+      title={actionTitle}
+      icon={Icon.Eye}
+      target={<ImagePreviewDetail title={title} imageBuffer={imageBuffer} actions={actions} />}
+    />
+  );
 }
 
 export default ImagePreviewDetail;

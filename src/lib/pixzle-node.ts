@@ -205,7 +205,9 @@ export class ImageFragmenter {
     };
 
     const sources = await Promise.all(paths.map((filePath) => this.loadSourceImage(filePath)));
-    const imageInfos = paths.map((filePath, index) => this.createImageInfo(filePath, sources[index].width, sources[index].height));
+    const imageInfos = paths.map((filePath, index) =>
+      this.createImageInfo(filePath, sources[index].width, sources[index].height),
+    );
 
     validateFileNames(imageInfos, this.config.preserveName);
 
@@ -222,7 +224,11 @@ export class ImageFragmenter {
     };
   }
 
-  private createManifest(manifestId: string, config: Required<FragmentationConfig>, imageInfos: ImageInfo[]): ManifestData {
+  private createManifest(
+    manifestId: string,
+    config: Required<FragmentationConfig>,
+    imageInfos: ImageInfo[],
+  ): ManifestData {
     return {
       id: manifestId,
       version: PIXZLE_NODE_VERSION,
