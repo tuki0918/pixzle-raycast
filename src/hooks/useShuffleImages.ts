@@ -37,6 +37,11 @@ function parseThumbnailSize(value: string | number | undefined) {
   return thumbnailSize;
 }
 
+function normalizeSeed(value: string | undefined) {
+  const seed = value?.trim();
+  return seed ? seed : undefined;
+}
+
 export function useShuffleImages(): UseShuffleImagesResult {
   const preferences = getPreferenceValues<Preferences>();
   const { isLoading, error, setError, handleError, setIsLoading, showErrorToast } = useLoadingState();
@@ -88,7 +93,7 @@ export function useShuffleImages(): UseShuffleImagesResult {
   }, [handleInstantCall]);
 
   const handleShuffle = useCallback(
-    async (imagePathsArg?: string[], workdirArg?: string, mode: ProcessingMode = "manual") => {
+    async (imagePathsArg?: string[], workdirArg?: string, mode: ProcessingMode = "manual", seedArg?: string) => {
       setIsLoading(true);
       setError(undefined);
 
@@ -98,6 +103,7 @@ export function useShuffleImages(): UseShuffleImagesResult {
           {
             blockSize: Number(preferences.blockSize),
             prefix: preferences.prefix,
+            seed: seedArg,
             preserveName: preferences.preserveName,
             crossImageShuffle: preferences.crossImageShuffle,
             thumbnail: preferences.thumbnail,
@@ -159,8 +165,11 @@ export function useShuffleImages(): UseShuffleImagesResult {
           throw new Error(`"${workdir}" does not exist.`);
         }
 
+        const manualConfig = {
+          seed: normalizeSeed(values.seed),
+        };
         const validated = validateShuffleFiles(imagePaths);
-        await handleShuffle(validated.imagePaths, workdir);
+        await handleShuffle(validated.imagePaths, workdir, "manual", manualConfig.seed);
         setIsLoading(false);
       } catch (e) {
         handleError(e);

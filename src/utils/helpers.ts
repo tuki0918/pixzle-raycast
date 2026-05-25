@@ -45,7 +45,7 @@ export async function findManifestAndImages(filePaths: string[]) {
 }
 
 export async function findImages(filePaths: string[]) {
-  const imagePaths = filePaths.sort();
+  const imagePaths = [...filePaths];
 
   if (imagePaths.length === 0) {
     throw new Error("No image files selected.");
@@ -64,7 +64,7 @@ export async function findImages(filePaths: string[]) {
 
 export async function getSelectedItems(): Promise<string[]> {
   try {
-    return (await getSelectedFinderItems()).map((f) => f.path).sort();
+    return (await getSelectedFinderItems()).map((f) => f.path);
   } catch (e) {
     // Do nothing if no files are selected
     console.log(String(e));

@@ -7,6 +7,7 @@ import GridShuffledImages from "./GridShuffledImages";
 export interface ShuffleImagesFormValues {
   folders: string[];
   outputDir: string[];
+  seed: string;
 }
 
 function ShuffleImagesForm() {
@@ -15,6 +16,7 @@ function ShuffleImagesForm() {
     initialValues: {
       folders: [],
       outputDir: [],
+      seed: "",
     },
     onSubmit: handleFormSubmit,
     validation: {
@@ -61,6 +63,12 @@ function ShuffleImagesForm() {
         canChooseFiles={false}
         {...itemProps.outputDir}
         info="Default: Downloads/pixzle.{UUID}"
+      />
+      <Form.TextField
+        title="Seed"
+        placeholder="Leave empty to generate automatically"
+        {...itemProps.seed}
+        info="Optional. Use the same seed to reproduce the same shuffle."
       />
     </Form>
   );
