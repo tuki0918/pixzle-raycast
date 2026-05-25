@@ -10,6 +10,7 @@ import {
   restoreImageBuffers,
   validateFileNames,
   validateFragmentImageCount,
+  validateManifestVersion,
   type FragmentationConfig,
   type ImageBufferData,
   type ImageInfo,
@@ -291,6 +292,7 @@ export class ImageFragmenter {
 
 export class ImageRestorer {
   async restoreImages(fragments: Array<Buffer | string>, manifest: ManifestData) {
+    validateManifestVersion(manifest);
     validateFragmentImageCount(fragments, manifest);
 
     const fragmentImages = await Promise.all(fragments.map((fragment) => this.loadFragment(fragment)));
