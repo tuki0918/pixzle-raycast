@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { getPreferenceValues, PopToRootType, showHUD } from "@raycast/api";
-import { generateFragmentFileName, type ManifestData } from "@pixzle/core";
+import { generateFragmentFileName, generateThumbnailFileName, type ManifestData } from "@pixzle/core";
 import pLimit from "p-limit";
-import { findImages, getSelectedItems, writeManifest, writeShuffledImage } from "../utils/helpers";
+import { findImages, getSelectedItems, writeManifest, writeShuffledImage, writeThumbnailImage } from "../utils/helpers";
 import { shuffleImages, validateShuffleFiles } from "../lib/pixzle";
 import { type ShuffleImagesFormValues } from "../components/ShuffleImagesForm";
 import { dirExists } from "../utils/file";
@@ -23,8 +23,19 @@ type ShuffleImagesData = {
   mode: ProcessingMode;
   manifest: ManifestData;
   imageBuffers: Buffer[];
+  thumbnailBuffers?: Buffer[];
   workdir: string | undefined;
 };
+
+function parseThumbnailSize(value: string | number | undefined) {
+  const thumbnailSize = Number(value ?? 100);
+
+  if (!Number.isInteger(thumbnailSize) || thumbnailSize <= 0) {
+    throw new Error("Thumbnail size must be a positive integer.");
+  }
+
+  return thumbnailSize;
+}
 
 export function useShuffleImages(): UseShuffleImagesResult {
   const preferences = getPreferenceValues<Preferences>();
@@ -45,7 +56,7 @@ export function useShuffleImages(): UseShuffleImagesResult {
     }
     instantCallStartedRef.current = true;
 
-    const { manifest, imageBuffers, workdir } = data;
+    const { manifest, imageBuffers, thumbnailBuffers, workdir } = data;
     await writeManifest(manifest, MANIFEST_FILE_NAME, workdir);
 
     const limit = pLimit(CONCURRENCY_LIMIT);
@@ -54,6 +65,14 @@ export function useShuffleImages(): UseShuffleImagesResult {
         limit(async () => {
           const fileName = generateFragmentFileName(manifest, i);
           await writeShuffledImage(manifest, imageBuffer, fileName, workdir);
+        }),
+      ),
+    );
+    await Promise.all(
+      (thumbnailBuffers ?? []).map(async (thumbnailBuffer, i) =>
+        limit(async () => {
+          const fileName = generateThumbnailFileName(manifest, i);
+          await writeThumbnailImage(manifest, thumbnailBuffer, fileName, workdir);
         }),
       ),
     );
@@ -75,16 +94,24 @@ export function useShuffleImages(): UseShuffleImagesResult {
 
       try {
         const validated = validateShuffleFiles(imagePathsArg);
-        const { manifest, fragmentedImages } = await shuffleImages(
+        const { manifest, fragmentedImages, thumbnailImages } = await shuffleImages(
           {
             blockSize: Number(preferences.blockSize),
             prefix: preferences.prefix,
             preserveName: preferences.preserveName,
             crossImageShuffle: preferences.crossImageShuffle,
+            thumbnail: preferences.thumbnail,
+            thumbnailSize: preferences.thumbnail ? parseThumbnailSize(preferences.thumbnailSize) : undefined,
           },
           validated.imagePaths,
         );
-        setData({ mode, manifest, imageBuffers: fragmentedImages, workdir: workdirArg });
+        setData({
+          mode,
+          manifest,
+          imageBuffers: fragmentedImages,
+          thumbnailBuffers: thumbnailImages,
+          workdir: workdirArg,
+        });
         setIsLoading(false);
       } catch (e) {
         handleError(e);

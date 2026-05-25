@@ -91,6 +91,21 @@ export async function writeShuffledImage(
   await writeFile(outputPath, fileName, imageBuffer);
 }
 
+export async function writeThumbnailImage(
+  manifest: ManifestData,
+  imageBuffer: Buffer,
+  fileName: string,
+  basePath?: string,
+) {
+  const outputDir = getDownloadDirectoryName(manifest.id);
+  const thumbnailDir = manifest.artifacts?.thumbnails?.directory ?? "thumbnails";
+  const outputPath = basePath
+    ? join(basePath, outputDir, thumbnailDir)
+    : join(homedir(), "Downloads", outputDir, thumbnailDir);
+  await createDirIfNotExists(outputPath);
+  await writeFile(outputPath, fileName, imageBuffer);
+}
+
 export async function writeRestoredImage(
   manifest: ManifestData,
   imageBuffer: Buffer,

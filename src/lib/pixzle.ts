@@ -1,6 +1,8 @@
-import { type FragmentationConfig, type ManifestData } from "@pixzle/core";
+import { type FragmentationConfig, type ManifestData, type ShuffleOptions } from "@pixzle/core";
 import { ImageFragmenter, ImageRestorer, loadJson } from "./pixzle-node";
 import { MANIFEST_FILE_NAME } from "../constraints";
+
+export type ShuffleImagesConfig = FragmentationConfig & Pick<ShuffleOptions, "thumbnail" | "thumbnailSize">;
 
 export async function readManifest(manifestPath: string) {
   return await loadJson<ManifestData>(manifestPath);
@@ -20,7 +22,7 @@ export function validateRestoreFiles(manifest?: ManifestData, imagePaths?: strin
   return { manifest, imagePaths };
 }
 
-export async function shuffleImages(config: FragmentationConfig, imagePaths: string[]) {
+export async function shuffleImages(config: ShuffleImagesConfig, imagePaths: string[]) {
   const fragmenter = new ImageFragmenter(config);
   return await fragmenter.fragmentImages(imagePaths);
 }

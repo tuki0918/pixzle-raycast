@@ -61,24 +61,40 @@ Vendored binaries target the macOS architecture used when `npm install` runs.
 ![](docs/preferences.png)
 
 ### Block Size
+
 - **Type**: Dropdown (1, 2, 3, 4, 8, 16, 32, 64, 128, 256)
 - **Default**: `8`
 - **Description**: Split the image into blocks and shuffle them. Larger block sizes use less memory but result in less fragmentation.
 
 ### File Prefix
+
 - **Type**: Text field
 - **Default**: `img`
 - **Description**: Set the prefix for shuffled output filenames.
 
 ### File Name
+
 - **Type**: Checkbox
 - **Default**: `Enabled`
 - **Description**: Restore the original file name when restoring.
 
 ### Cross Image Shuffle
+
 - **Type**: Checkbox
 - **Default**: `Disabled`
 - **Description**: Shuffle blocks across all selected images instead of shuffling each image independently.
+
+### Thumbnail
+
+- **Type**: Checkbox
+- **Default**: `Disabled`
+- **Description**: Generate thumbnails for the original images when shuffling.
+
+### Thumbnail Size
+
+- **Type**: Text field
+- **Default**: `100`
+- **Description**: Set the maximum thumbnail width and height in pixels.
 
 </details>
 

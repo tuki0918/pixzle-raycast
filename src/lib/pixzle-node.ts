@@ -14,9 +14,11 @@ import {
   type ImageBufferData,
   type ImageInfo,
   type ManifestData,
+  type ShuffleOptions,
 } from "@pixzle/core";
 
-const PIXZLE_NODE_VERSION = "0.2.0";
+const PIXZLE_NODE_VERSION = "0.3.0";
+const DEFAULT_THUMBNAIL_SIZE = 100;
 const SEED_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const SEED_LENGTH = 12;
 const VENDORED_SHARP_PACKAGE_PATH = path.join("assets", "vendor", "node_modules", "sharp", "package.json");
@@ -40,6 +42,7 @@ type SharpInstance = {
   ensureAlpha(): SharpInstance;
   metadata(): Promise<SharpMetadata>;
   raw(): SharpInstance;
+  resize(options: { width: number; height: number; fit: "inside"; withoutEnlargement: boolean }): SharpInstance;
   png(): SharpInstance;
   toBuffer(options?: { resolveWithObject?: boolean }): Promise<Buffer | SharpToBufferResult>;
   toFile(outputPath: string): Promise<unknown>;
@@ -47,6 +50,8 @@ type SharpInstance = {
 
 type SharpModule = (input: Buffer | string, options?: unknown) => SharpInstance;
 type BaseFragmentationConfig = Omit<Required<FragmentationConfig>, "seed"> & Pick<FragmentationConfig, "seed">;
+type NodeFragmentationConfig = BaseFragmentationConfig & Required<Pick<ShuffleOptions, "thumbnail" | "thumbnailSize">>;
+type FragmentationOnlyConfig = Required<FragmentationConfig>;
 
 let cachedSharp: SharpModule | undefined;
 
@@ -184,25 +189,36 @@ async function createPngFromImageBuffer(imageBuffer: Buffer, width: number, heig
   }
 }
 
-export class ImageFragmenter {
-  private config: BaseFragmentationConfig;
+async function createThumbnail(input: Buffer | string, thumbnailSize: number) {
+  const buffer = Buffer.isBuffer(input) ? input : await loadBuffer(input);
+  return (await getSharp()(buffer)
+    .resize({ width: thumbnailSize, height: thumbnailSize, fit: "inside", withoutEnlargement: true })
+    .png()
+    .toBuffer()) as Buffer;
+}
 
-  constructor(config: FragmentationConfig) {
+export class ImageFragmenter {
+  private config: NodeFragmentationConfig;
+
+  constructor(config: FragmentationConfig & Pick<ShuffleOptions, "thumbnail" | "thumbnailSize">) {
     this.config = {
       blockSize: config.blockSize ?? DEFAULT_FRAGMENTATION_CONFIG.BLOCK_SIZE,
       prefix: config.prefix ?? DEFAULT_FRAGMENTATION_CONFIG.PREFIX,
       seed: config.seed,
       preserveName: config.preserveName ?? DEFAULT_FRAGMENTATION_CONFIG.PRESERVE_NAME,
       crossImageShuffle: config.crossImageShuffle ?? DEFAULT_FRAGMENTATION_CONFIG.CROSS_IMAGE_SHUFFLE,
+      thumbnail: config.thumbnail ?? false,
+      thumbnailSize: config.thumbnailSize ?? DEFAULT_THUMBNAIL_SIZE,
     };
   }
 
   async fragmentImages(paths: string[]) {
     const manifestId = generateManifestId();
-    const config = {
+    const fullConfig = {
       ...this.config,
       seed: this.config.seed ?? generateSeedId(),
     };
+    const { thumbnail, thumbnailSize, ...config } = fullConfig;
 
     const sources = await Promise.all(paths.map((filePath) => this.loadSourceImage(filePath)));
     const imageInfos = paths.map((filePath, index) =>
@@ -212,22 +228,27 @@ export class ImageFragmenter {
     validateFileNames(imageInfos, this.config.preserveName);
 
     const fragmentedBuffers = fragmentImageBuffers(sources, config);
-    const fragmentedImages = await Promise.all(
-      fragmentedBuffers.map((fragment) =>
-        createPngFromImageBuffer(Buffer.from(fragment.buffer), fragment.width, fragment.height),
+    const [fragmentedImages, thumbnailImages] = await Promise.all([
+      Promise.all(
+        fragmentedBuffers.map((fragment) =>
+          createPngFromImageBuffer(Buffer.from(fragment.buffer), fragment.width, fragment.height),
+        ),
       ),
-    );
+      thumbnail ? Promise.all(paths.map((filePath) => createThumbnail(filePath, thumbnailSize))) : undefined,
+    ]);
 
     return {
-      manifest: this.createManifest(manifestId, config, imageInfos),
+      manifest: this.createManifest(manifestId, config, imageInfos, thumbnail ? thumbnailSize : undefined),
       fragmentedImages,
+      thumbnailImages,
     };
   }
 
   private createManifest(
     manifestId: string,
-    config: Required<FragmentationConfig>,
+    config: FragmentationOnlyConfig,
     imageInfos: ImageInfo[],
+    thumbnailSize?: number,
   ): ManifestData {
     return {
       id: manifestId,
@@ -235,6 +256,16 @@ export class ImageFragmenter {
       timestamp: new Date().toISOString(),
       config,
       images: imageInfos,
+      artifacts:
+        thumbnailSize === undefined
+          ? undefined
+          : {
+              thumbnails: {
+                enabled: true,
+                size: thumbnailSize,
+                directory: "thumbnails",
+              },
+            },
     };
   }
 

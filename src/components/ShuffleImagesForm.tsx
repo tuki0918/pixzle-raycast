@@ -27,7 +27,14 @@ function ShuffleImagesForm() {
   }
 
   if (data) {
-    return <GridShuffledImages manifest={data.manifest} imageBuffers={data.imageBuffers} workdir={data.workdir} />;
+    return (
+      <GridShuffledImages
+        manifest={data.manifest}
+        imageBuffers={data.imageBuffers}
+        thumbnailBuffers={data.thumbnailBuffers}
+        workdir={data.workdir}
+      />
+    );
   }
 
   return (

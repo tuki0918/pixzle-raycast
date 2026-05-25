@@ -8,10 +8,11 @@ import { PreviewImageAction } from "./ImagePreviewDetail";
 interface GridShuffledImagesProps {
   manifest: ManifestData;
   imageBuffers: Buffer[];
+  thumbnailBuffers?: Buffer[];
   workdir?: string;
 }
 
-function GridShuffledImages({ manifest, imageBuffers, workdir }: GridShuffledImagesProps) {
+function GridShuffledImages({ manifest, imageBuffers, thumbnailBuffers, workdir }: GridShuffledImagesProps) {
   return (
     <Grid filtering={false} searchText="Shuffled Images" onSearchTextChange={() => {}} inset={Grid.Inset.Small}>
       <Grid.Item
@@ -22,6 +23,7 @@ function GridShuffledImages({ manifest, imageBuffers, workdir }: GridShuffledIma
             <DownloadAllImagesAction
               manifest={manifest}
               imageBuffers={imageBuffers}
+              thumbnailBuffers={thumbnailBuffers}
               workdir={workdir}
               isShuffled={true}
             />
@@ -43,6 +45,7 @@ function GridShuffledImages({ manifest, imageBuffers, workdir }: GridShuffledIma
             <DownloadAllImagesAction
               manifest={manifest}
               imageBuffers={imageBuffers}
+              thumbnailBuffers={thumbnailBuffers}
               workdir={workdir}
               isShuffled={true}
             />
@@ -68,6 +71,7 @@ function GridShuffledImages({ manifest, imageBuffers, workdir }: GridShuffledIma
                 <DownloadAllImagesAction
                   manifest={manifest}
                   imageBuffers={imageBuffers}
+                  thumbnailBuffers={thumbnailBuffers}
                   workdir={workdir}
                   isShuffled={true}
                 />

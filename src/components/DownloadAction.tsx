@@ -3,20 +3,28 @@ import {
   generateFragmentFileName,
   generateRestoredFileName,
   generateRestoredOriginalFileName,
+  generateThumbnailFileName,
   type ManifestData,
 } from "@pixzle/core";
 import pLimit from "p-limit";
-import { writeManifest, writeRestoredImage, writeShuffledImage } from "../utils/helpers";
+import { writeManifest, writeRestoredImage, writeShuffledImage, writeThumbnailImage } from "../utils/helpers";
 import { MANIFEST_FILE_NAME, CONCURRENCY_LIMIT } from "../constraints";
 
 interface DownloadActionProps {
   manifest: ManifestData;
   imageBuffers: Buffer[];
+  thumbnailBuffers?: Buffer[];
   workdir?: string;
   isShuffled?: boolean;
 }
 
-export function DownloadAllImagesAction({ manifest, imageBuffers, workdir, isShuffled = false }: DownloadActionProps) {
+export function DownloadAllImagesAction({
+  manifest,
+  imageBuffers,
+  thumbnailBuffers,
+  workdir,
+  isShuffled = false,
+}: DownloadActionProps) {
   return (
     <Action
       title="Download All"
@@ -30,6 +38,14 @@ export function DownloadAllImagesAction({ manifest, imageBuffers, workdir, isShu
               return limit(async () => {
                 const fileName = generateFragmentFileName(manifest, i);
                 await writeShuffledImage(manifest, imageBuffer, fileName, workdir);
+              });
+            }),
+          );
+          await Promise.all(
+            (thumbnailBuffers ?? []).map(async (thumbnailBuffer, i) => {
+              return limit(async () => {
+                const fileName = generateThumbnailFileName(manifest, i);
+                await writeThumbnailImage(manifest, thumbnailBuffer, fileName, workdir);
               });
             }),
           );
